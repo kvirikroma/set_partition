@@ -1,55 +1,41 @@
 import sys
+
+import numpy as np
+
 from bin_vec import BinVec
-from numpy import matrix
 
 
-def target_fn(bin_vec: BinVec, values: list[int], matrix: matrix) -> int:
-    if not vec_is_fine(bin_vec, matrix):
+def target_fn(bin_vec: BinVec, values: list[int], mat: np.matrix) -> int:
+    if not vec_is_fine(bin_vec, mat):
         return sys.maxsize
-
-    sum = 0
+    result = 0
     for i in range(len(bin_vec.bits)):
-        sum += bin_vec.bits[i] * values[i]
+        result += bin_vec.bits[i] * values[i]
+    return result
 
-    return sum
 
-
-def vec_is_fine(bin_vec: BinVec, mat: matrix) -> bool:
-    n = len(bin_vec.bits)
-    stacked = [0 for _ in range(mat.shape[0])]
-
+def vec_is_fine(bin_vec: BinVec, mat: np.matrix) -> bool:
+    stacked = np.zeros(mat.shape[:1], dtype=int)
     for j in range(len(bin_vec.bits)):
         if bin_vec.bits[j] == 0:
             continue
-
         col = mat[:, j].getA1()
-        for i in range(len(col)):
-            stacked[i] += col[i]
-
-    for e in stacked:
-        if e != 1:
-            return False
-
-    return True
+        stacked += col
+    return (stacked == np.ones_like(stacked)).all()
 
 
-def hill_climb_min(values: list[int], mat: matrix) -> BinVec:
+def hill_climb_min(values: list[int], mat: np.matrix) -> BinVec:
     x = BinVec.random(len(values))
-    found = True
-
-    while found:
-        min = sys.maxsize
+    while True:
+        minimum = sys.maxsize
         y = x.clone()
-
         for each in x.two_flip():
             temp = target_fn(each, values, mat)
-            if temp < min:
-                min = temp
+            if temp < minimum:
+                minimum = temp
                 y = each
-
         if target_fn(y, values, mat) < target_fn(x, values, mat):
             x = y
         else:
-            found = False
-
+            break
     return x

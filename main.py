@@ -1,16 +1,18 @@
 import sys
-from typing import Tuple
+# from concurrent.futures import ProcessPoolExecutor
+
+import numpy as np
+
 from bin_vec import BinVec
-from numpy import matrix, zeros
 from hill_climb import hill_climb_min, target_fn
 
 
-def read_file(path: str) -> Tuple[list[int], matrix]:
+def read_file(path: str) -> tuple[list[int], np.matrix]:
     file = open(path)
     lines = list(map(lambda l: l.strip(), file.readlines()))
 
     shape = list(filter(lambda e: e != "", lines[0].split(" ")))
-    mat = zeros((int(shape[0]), int(shape[1])), dtype=int)
+    mat = np.zeros((int(shape[0]), int(shape[1])), dtype=int)
     values = []
 
     for i in range(1, len(lines)):
@@ -20,10 +22,10 @@ def read_file(path: str) -> Tuple[list[int], matrix]:
         for j in nums[2:]:
             mat[int(j) - 1, i - 1] = 1
 
-    return (values, matrix(mat))
+    return values, np.matrix(mat)
 
 
-def run(runs: int, values: list[int], mat: matrix):
+def run(runs: int, values: list[int], mat: np.matrix):
     results = []
     for i in range(0, runs):
         vec = hill_climb_min(values, mat)
@@ -34,7 +36,7 @@ def run(runs: int, values: list[int], mat: matrix):
     return results
 
 
-def analyze(results: list[int], values: list[int], mat: matrix):
+def analyze(results: list[int], values: list[int], mat: np.matrix):
     best = (sys.maxsize, 0)
     worst = (0, 0)
 
@@ -56,7 +58,8 @@ def analyze(results: list[int], values: list[int], mat: matrix):
 
 
 def main():
-    (values, mat) = read_file("data/test.txt")
+    # (values, mat) = read_file("data/test.txt")
+    (values, mat) = read_file("data/sppnw08.txt")
 
     # Debug print
     # print(f"{values}\n{mat}\n")

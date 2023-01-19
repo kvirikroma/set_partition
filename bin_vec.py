@@ -1,15 +1,17 @@
-import random
+import numpy as np
 
 
 class BinVec:
-    def __init__(self, bits: list[int]):
+    def __init__(self, bits: np.array):
         self.bits = bits
 
-    def random(len: int):
-        return BinVec([random.randint(0, 1) for _ in range(len)])
+    @staticmethod
+    def random(length: int):
+        return BinVec(np.random.randint(2, size=length))
 
-    def ones(len: int):
-        return BinVec([1 for _ in range(len)])
+    @staticmethod
+    def ones(length: int):
+        return BinVec(np.ones((length,), dtype=int))
 
     def one_flip(self):
         flips = [self.clone()]
@@ -33,4 +35,4 @@ class BinVec:
         return flips
 
     def clone(self):
-        return BinVec(self.bits[:])
+        return BinVec(self.bits.copy())
