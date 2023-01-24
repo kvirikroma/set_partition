@@ -1,5 +1,8 @@
 import sys
-# from concurrent.futures import ProcessPoolExecutor
+from os import cpu_count
+import datetime
+from math import log2, pi
+from concurrent.futures import ProcessPoolExecutor
 
 import numpy as np
 
@@ -7,7 +10,7 @@ from bin_vec import BinVec
 from hill_climb import hill_climb_min, target_fn
 
 
-def read_file(path: str) -> tuple[list[int], np.matrix]:
+def read_file(path: str) -> tuple[list[int], np.array]:
     file = open(path)
     lines = list(map(lambda l: l.strip(), file.readlines()))
 
@@ -22,21 +25,35 @@ def read_file(path: str) -> tuple[list[int], np.matrix]:
         for j in nums[2:]:
             mat[int(j) - 1, i - 1] = 1
 
-    return values, np.matrix(mat)
+    return values, np.asarray(np.matrix(mat))
 
 
 def run(runs: int, values: list[int], mat: np.matrix):
     results = []
-    for i in range(0, runs):
-        vec = hill_climb_min(values, mat)
-        target_fn_val = target_fn(vec, values, mat)
-        results.append(target_fn_val)
-        print(f"Run {i + 1}: {target_fn_val}")
-
+    executor = ProcessPoolExecutor(max_workers=max(cpu_count() - 1, 2))
+    try:
+        for i, vec in zip(
+                range(runs), executor.map(hill_climb_min, (values for _ in range(runs)), (mat for _ in range(runs)))
+        ):
+            target_fn_val = target_fn(vec, values, mat)
+            results.append(target_fn_val)
+            print(f"{datetime.datetime.now()} Run {i + 1}: {target_fn_val}")
+    finally:
+        executor.shutdown(wait=False, cancel_futures=True)
     return results
 
 
-def analyze(results: list[int], values: list[int], mat: np.matrix):
+# def run(runs: int, values: list[int], mat: np.array):
+#     results = []
+#     for i in range(0, runs):
+#         vec = hill_climb_min(values, mat)
+#         target_fn_val = target_fn(vec, values, mat)
+#         results.append(target_fn_val)
+#         print(f"{datetime.datetime.now()} Run {i + 1}: {target_fn_val}")
+#     return results
+
+
+def analyze(results: list[int], values: list[int], mat: np.array):
     best = (sys.maxsize, 0)
     worst = (0, 0)
 
@@ -64,7 +81,10 @@ def main():
     # Debug print
     # print(f"{values}\n{mat}\n")
 
-    results = run(100, values, mat)
+    print(mat.shape)
+    runs = round(log2((mat.shape[0]) ** pi) * (log2(mat.shape[1]) ** pi))
+    print("Runs: ", runs)
+    results = run(runs, values, mat)
     analyze(results, values, mat)
 
 
