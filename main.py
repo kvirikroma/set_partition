@@ -29,6 +29,7 @@ def read_file(path: str) -> tuple[list[int], np.array]:
 
 
 def run(runs: int, values: list[int], mat: np.matrix):
+    print("Runs: ", runs)
     results = []
     executor = ProcessPoolExecutor(max_workers=max(cpu_count() - 1, 2))
     try:
@@ -43,14 +44,15 @@ def run(runs: int, values: list[int], mat: np.matrix):
     return results
 
 
-# def run(runs: int, values: list[int], mat: np.array):
-#     results = []
-#     for i in range(0, runs):
-#         vec = hill_climb_min(values, mat)
-#         target_fn_val = target_fn(vec, values, mat)
-#         results.append(target_fn_val)
-#         print(f"{datetime.datetime.now()} Run {i + 1}: {target_fn_val}")
-#     return results
+def run_on_single_thread(runs: int, values: list[int], mat: np.array):
+    print("Runs: ", runs)
+    results = []
+    for i in range(0, runs):
+        vec = hill_climb_min(values, mat)
+        target_fn_val = target_fn(vec, values, mat)
+        results.append(target_fn_val)
+        print(f"{datetime.datetime.now()} Run {i + 1}: {target_fn_val}")
+    return results
 
 
 def analyze(results: list[int], values: list[int], mat: np.array):
@@ -83,8 +85,8 @@ def main():
 
     print(mat.shape)
     runs = round(log2((mat.shape[0]) ** pi) * (log2(mat.shape[1]) ** pi))
-    print("Runs: ", runs)
     results = run(runs, values, mat)
+    # results = run_on_single_thread(runs // cpu_count(), values, mat)
     analyze(results, values, mat)
 
 

@@ -22,17 +22,14 @@ class BinVec:
         return flips
 
     def two_flip(self):
-        flips = [self.clone()]
+        yield self.clone()
         for i in range(len(self.bits)):
             for j in range(i, len(self.bits)):
                 copy = self.clone()
                 copy.bits[i] = 1 - copy.bits[i]
-
                 if i != j:
                     copy.bits[j] = 1 - copy.bits[j]
-
-                flips.append(copy)
-        return flips
+                yield copy
 
     def clone(self):
         return BinVec(self.bits.copy())
