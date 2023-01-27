@@ -25,6 +25,7 @@ def hill_climb_min(values: list[int], mat: np.array) -> BinVec:
     while True:
         minimum = sys.maxsize
         y = x.clone()
+        # for each in x.three_flip():
         for each in x.two_flip():
             temp = target_fn(each, values, mat)
             if temp < minimum:
