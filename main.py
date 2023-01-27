@@ -31,7 +31,8 @@ def read_file(path: str) -> tuple[list[int], np.array]:
 def run(runs: int, values: list[int], mat: np.matrix):
     print("Runs: ", runs)
     results = []
-    executor = ProcessPoolExecutor(max_workers=max(cpu_count() - 1, 2))
+    executor = ProcessPoolExecutor(max_workers=max(cpu_count(), 2))
+    # executor = ProcessPoolExecutor(max_workers=max(cpu_count() - 1, 2))
     try:
         for i, vec in zip(
                 range(runs), executor.map(hill_climb_min, (values for _ in range(runs)), (mat for _ in range(runs)))
@@ -77,15 +78,16 @@ def analyze(results: list[int], values: list[int], mat: np.array):
 
 
 def main():
-    # (values, mat) = read_file("data/test.txt")
-    (values, mat) = read_file("data/sppnw08.txt")
+    (values, mat) = read_file("data/large_test.txt")
+    # (values, mat) = read_file("data/sppnw08.txt")
 
     # Debug print
     # print(f"{values}\n{mat}\n")
 
     print(mat.shape)
     runs = round(log2((mat.shape[0]) ** pi) * (log2(mat.shape[1]) ** pi))
-    results = run(runs, values, mat)
+    # results = run(runs, values, mat)
+    results = run(runs * 100, values, mat)
     # results = run_on_single_thread(runs // cpu_count(), values, mat)
     analyze(results, values, mat)
 
